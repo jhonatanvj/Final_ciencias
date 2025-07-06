@@ -9,17 +9,21 @@ class JSONDatabase:
         self.cargar()
 
     def insertar(self, clave, objeto):
+        clave = int(clave)
         self.raiz = self.arbol.insertar(self.raiz, clave, objeto)
         self.guardar()
 
     def obtener(self, clave):
+        clave = int(clave)
         return self.arbol.buscar(self.raiz, clave)
 
     def actualizar(self, clave, nuevo_objeto):
+        clave = int(clave)
         self.eliminar(clave)
         self.insertar(clave, nuevo_objeto)
 
     def eliminar(self, clave):
+        clave = int(clave)
         self.raiz = self.arbol.eliminar(self.raiz, clave)
         self.guardar()
 
@@ -47,6 +51,7 @@ class JSONDatabase:
                 elementos = json.loads(contenido)
                 for par in elementos:
                     for clave, datos in par.items():
+                        clave = int(clave)
                         self.raiz = self.arbol.insertar(self.raiz, clave, datos)
         except FileNotFoundError:
             pass
