@@ -1,57 +1,52 @@
 import json
 from avl_tree import AVLTree
-from node import Node
 
 class JSONDatabase:
-    def __init__(self, file_path='storage.json'):
-        self.tree = AVLTree()
-        self.root = None
-        self.file_path = file_path
-        self.load()
+    def __init__(self, archivo='storage.json'):
+        self.arbol = AVLTree()
+        self.raiz = None
+        self.archivo = archivo
+        self.cargar()
 
-    def insert(self, key, obj):
-        self.root = self.tree.insert(self.root, key, obj)
-        self.save()
+    def insertar(self, clave, objeto):
+        self.raiz = self.arbol.insertar(self.raiz, clave, objeto)
+        self.guardar()
 
-    def get(self, key):
-        return self.tree.search(self.root, key)
+    def obtener(self, clave):
+        return self.arbol.buscar(self.raiz, clave)
 
-    def update(self, key, new_obj):
-        if self.get(key):
-            self.delete(key)
-            self.insert(key, new_obj)
-        else:
-            raise KeyError("Objeto no encontrado")
+    def actualizar(self, clave, nuevo_objeto):
+        self.eliminar(clave)
+        self.insertar(clave, nuevo_objeto)
 
-    def delete(self, key):
-        self.root = self._delete_node(self.root, key)
-        self.save()
+    def eliminar(self, clave):
+        self.raiz = self.arbol.eliminar(self.raiz, clave)
+        self.guardar()
 
-    def _delete_node(self, root, key):
-        # Implementación opcional de borrado en AVL
-        pass  # Se puede implementar después
+    def listar(self):
+        resultados = []
+        self._inorden(self.raiz, resultados)
+        return resultados
 
-    def list_all(self):
-        result = []
-        self._inorder(self.root, result)
-        return result
+    def _inorden(self, nodo, resultados):
+        if nodo:
+            self._inorden(nodo.izquierda, resultados)
+            resultados.append({nodo.clave: nodo.datos})
+            self._inorden(nodo.derecha, resultados)
 
-    def _inorder(self, node, result):
-        if node:
-            self._inorder(node.left, result)
-            result.append({node.key: node.data})
-            self._inorder(node.right, result)
+    def guardar(self):
+        with open(self.archivo, 'w') as f:
+            json.dump(self.listar(), f, indent=4)
 
-    def save(self):
-        with open(self.file_path, 'w') as f:
-            json.dump(self.list_all(), f, indent=4)
-
-    def load(self):
+    def cargar(self):
         try:
-            with open(self.file_path, 'r') as f:
-                items = json.load(f)
-                for pair in items:
-                    for key, data in pair.items():
-                        self.root = self.tree.insert(self.root, key, data)
+            with open(self.archivo, 'r') as f:
+                contenido = f.read()
+                if not contenido.strip():
+                    return
+                elementos = json.loads(contenido)
+                for par in elementos:
+                    for clave, datos in par.items():
+                        self.raiz = self.arbol.insertar(self.raiz, clave, datos)
         except FileNotFoundError:
             pass

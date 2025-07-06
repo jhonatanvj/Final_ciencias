@@ -1,34 +1,41 @@
 from database import JSONDatabase
 
-db = JSONDatabase()
+bd = JSONDatabase()
 
 while True:
-    print("\n1. Insertar\n2. Buscar\n3. Listar todo\n4. Actualizar\n5. Salir")
-    op = input("Elige una opción: ")
-    
-    if op == '1':
-        key = input("Clave: ")
-        name = input("Nombre: ")
+    print("""
+1. Insertar objeto
+2. Buscar objeto por clave
+3. Listar todos los objetos
+4. Actualizar objeto
+5. Eliminar objeto
+6. Salir""")
+    opcion = input("Seleccione una opción: ")
+
+    if opcion == '1':
+        clave = input("Clave del objeto: ")
+        nombre = input("Nombre: ")
         edad = input("Edad: ")
-        db.insert(key, {"nombre": name, "edad": edad})
-        print("Insertado")
-    
-    elif op == '2':
-        key = input("Clave: ")
-        data = db.get(key)
-        print("Resultado:", data if data else "No encontrado")
-    
-    elif op == '3':
-        print("Registros:")
-        for item in db.list_all():
+        bd.insertar(clave, {"nombre": nombre, "edad": edad})
+        print("Objeto insertado exitosamente.")
+    elif opcion == '2':
+        clave = input("Clave a buscar: ")
+        resultado = bd.obtener(clave)
+        print("Resultado:", resultado if resultado else "No encontrado")
+    elif opcion == '3':
+        for item in bd.listar():
             print(item)
-
-    elif op == '4':
-        key = input("Clave a actualizar: ")
-        name = input("Nuevo nombre: ")
+    elif opcion == '4':
+        clave = input("Clave del objeto a actualizar: ")
+        nombre = input("Nuevo nombre: ")
         edad = input("Nueva edad: ")
-        db.update(key, {"nombre": name, "edad": edad})
-        print("Actualizado")
-
-    elif op == '5':
+        bd.actualizar(clave, {"nombre": nombre, "edad": edad})
+        print("Objeto actualizado.")
+    elif opcion == '5':
+        clave = input("Clave del objeto a eliminar: ")
+        bd.eliminar(clave)
+        print("Objeto eliminado.")
+    elif opcion == '6':
         break
+    else:
+        print("Opción no válida.")

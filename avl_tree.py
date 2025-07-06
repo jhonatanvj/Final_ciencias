@@ -1,63 +1,104 @@
 from node import Node
 
 class AVLTree:
-    def insert(self, root, key, data):
-        if not root:
-            return Node(key, data)
-        elif key < root.key:
-            root.left = self.insert(root.left, key, data)
-        elif key > root.key:
-            root.right = self.insert(root.right, key, data)
+    def insertar(self, raiz, clave, datos):
+        if not raiz:
+            return Node(clave, datos)
+        elif clave <= raiz.clave:
+            raiz.izquierda = self.insertar(raiz.izquierda, clave, datos)
         else:
-            raise ValueError("Clave duplicada no permitida")
+            raiz.derecha = self.insertar(raiz.derecha, clave, datos)
 
-        root.height = 1 + max(self.getHeight(root.left), self.getHeight(root.right))
-        balance = self.getBalance(root)
+        raiz.altura = 1 + max(self.obtener_altura(raiz.izquierda), self.obtener_altura(raiz.derecha))
+        balance = self.obtener_balance(raiz)
 
-        # Rotaciones
-        if balance > 1 and key < root.left.key:
-            return self.rotateRight(root)
-        if balance < -1 and key > root.right.key:
-            return self.rotateLeft(root)
-        if balance > 1 and key > root.left.key:
-            root.left = self.rotateLeft(root.left)
-            return self.rotateRight(root)
-        if balance < -1 and key < root.right.key:
-            root.right = self.rotateRight(root.right)
-            return self.rotateLeft(root)
+        if balance > 1 and clave <= raiz.izquierda.clave:
+            return self.rotar_derecha(raiz)
+        if balance < -1 and clave > raiz.derecha.clave:
+            return self.rotar_izquierda(raiz)
+        if balance > 1 and clave > raiz.izquierda.clave:
+            raiz.izquierda = self.rotar_izquierda(raiz.izquierda)
+            return self.rotar_derecha(raiz)
+        if balance < -1 and clave <= raiz.derecha.clave:
+            raiz.derecha = self.rotar_derecha(raiz.derecha)
+            return self.rotar_izquierda(raiz)
 
-        return root
+        return raiz
 
-    def search(self, root, key):
-        if not root:
+    def buscar(self, raiz, clave):
+        if not raiz:
             return None
-        if key == root.key:
-            return root.data
-        elif key < root.key:
-            return self.search(root.left, key)
+        if clave == raiz.clave:
+            return raiz.datos
+        elif clave < raiz.clave:
+            return self.buscar(raiz.izquierda, clave)
         else:
-            return self.search(root.right, key)
+            return self.buscar(raiz.derecha, clave)
 
-    def getHeight(self, node):
-        return node.height if node else 0
+    def eliminar(self, raiz, clave):
+        if not raiz:
+            return raiz
 
-    def getBalance(self, node):
-        return self.getHeight(node.left) - self.getHeight(node.right) if node else 0
+        if clave < raiz.clave:
+            raiz.izquierda = self.eliminar(raiz.izquierda, clave)
+        elif clave > raiz.clave:
+            raiz.derecha = self.eliminar(raiz.derecha, clave)
+        else:
+            if not raiz.izquierda:
+                return raiz.derecha
+            elif not raiz.derecha:
+                return raiz.izquierda
 
-    def rotateLeft(self, z):
-        y = z.right
-        T2 = y.left
-        y.left = z
-        z.right = T2
-        z.height = 1 + max(self.getHeight(z.left), self.getHeight(z.right))
-        y.height = 1 + max(self.getHeight(y.left), self.getHeight(y.right))
+            temp = self.obtener_maximo(raiz.izquierda)
+            raiz.clave = temp.clave
+            raiz.datos = temp.datos
+            raiz.izquierda = self.eliminar(raiz.izquierda, temp.clave)
+
+        if not raiz:
+            return raiz
+
+        raiz.altura = 1 + max(self.obtener_altura(raiz.izquierda), self.obtener_altura(raiz.derecha))
+        balance = self.obtener_balance(raiz)
+
+        if balance > 1 and self.obtener_balance(raiz.izquierda) >= 0:
+            return self.rotar_derecha(raiz)
+        if balance < -1 and self.obtener_balance(raiz.derecha) <= 0:
+            return self.rotar_izquierda(raiz)
+        if balance > 1 and self.obtener_balance(raiz.izquierda) < 0:
+            raiz.izquierda = self.rotar_izquierda(raiz.izquierda)
+            return self.rotar_derecha(raiz)
+        if balance < -1 and self.obtener_balance(raiz.derecha) > 0:
+            raiz.derecha = self.rotar_derecha(raiz.derecha)
+            return self.rotar_izquierda(raiz)
+
+        return raiz
+
+    def obtener_maximo(self, nodo):
+        actual = nodo
+        while actual.derecha:
+            actual = actual.derecha
+        return actual
+
+    def obtener_altura(self, nodo):
+        return nodo.altura if nodo else 0
+
+    def obtener_balance(self, nodo):
+        return self.obtener_altura(nodo.izquierda) - self.obtener_altura(nodo.derecha) if nodo else 0
+
+    def rotar_izquierda(self, z):
+        y = z.derecha
+        T2 = y.izquierda
+        y.izquierda = z
+        z.derecha = T2
+        z.altura = 1 + max(self.obtener_altura(z.izquierda), self.obtener_altura(z.derecha))
+        y.altura = 1 + max(self.obtener_altura(y.izquierda), self.obtener_altura(y.derecha))
         return y
 
-    def rotateRight(self, z):
-        y = z.left
-        T3 = y.right
-        y.right = z
-        z.left = T3
-        z.height = 1 + max(self.getHeight(z.left), self.getHeight(z.right))
-        y.height = 1 + max(self.getHeight(y.left), self.getHeight(y.right))
+    def rotar_derecha(self, z):
+        y = z.izquierda
+        T3 = y.derecha
+        y.derecha = z
+        z.izquierda = T3
+        z.altura = 1 + max(self.obtener_altura(z.izquierda), self.obtener_altura(z.derecha))
+        y.altura = 1 + max(self.obtener_altura(y.izquierda), self.obtener_altura(y.derecha))
         return y
